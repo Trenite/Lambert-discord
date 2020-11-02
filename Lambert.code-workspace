@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "discord-lambert"
+		},
+		{
+			"path": "discord-lambert/node_modules/discord.js"
+		}
+	],
+	"settings": {}
+}

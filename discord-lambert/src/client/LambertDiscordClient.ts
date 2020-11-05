@@ -1,18 +1,17 @@
-import { Client, ClientOptions, Collection } from "discord.js";
-import { Command } from "../structures/Command";
+require("../structures/LambertExtended");
+import { Client, ClientOptions } from "discord.js";
 import { LambertWebSocketOptions, LambertWebSocketManager } from "./websocket/LambertWebSocketManager";
-import mongoose, { Connection } from "mongoose";
-import { MongoMemoryServer } from "mongodb-memory-server";
 import { Constants } from "../structures/Constants";
 import { Registry } from "../structures/Registry";
 import { SyncDatabase } from "../controllers/SyncDatabase";
 const { Events } = Constants;
+import { Database, MongoDatabase } from "../controllers/Database";
+import { Property } from "../structures/Datastore";
 
 export class LambertDiscordClient extends Client {
 	public options: LambertClientOptions;
 	public registry: Registry;
-	public dbConnection: Connection;
-	private mongod?: MongoMemoryServer;
+	public db: Database<Property>;
 	private intialized: Promise<void>;
 	private dbSync: SyncDatabase;
 
@@ -22,6 +21,7 @@ export class LambertDiscordClient extends Client {
 
 		this.ws = new LambertWebSocketManager(this);
 		this.registry = new Registry(this);
+		if (!this.options.db) this.db = new MongoDatabase();
 		this.dbSync = new SyncDatabase(this);
 
 		this.intialized = this.init();
@@ -29,21 +29,7 @@ export class LambertDiscordClient extends Client {
 
 	async init() {
 		this.emit(Events.DEBUG, "intializing Lambert client");
-		// use promise all to intialize
-		await Promise.all([
-			(async () => {
-				var dbConnectionUri = this.options.mongodb;
-				if (!this.options.mongodb) {
-					this.mongod = require("../controllers/Mongod").default;
-					dbConnectionUri = await this.mongod?.getUri();
-				}
-				this.dbConnection = await mongoose.createConnection(<string>dbConnectionUri, {
-					useNewUrlParser: true,
-					useUnifiedTopology: true,
-				});
-			})(),
-		]);
-		this.emit(Events.DEBUG, "intialized Lambert client");
+		await this.db.init();
 		this.emit(Events.CLIENT_INIT);
 	}
 
@@ -54,12 +40,11 @@ export class LambertDiscordClient extends Client {
 
 	async destroy() {
 		super.destroy();
-		this.dbConnection.close();
-		await this.mongod?.stop();
+		return this.db.close();
 	}
 }
 
 export interface LambertClientOptions extends ClientOptions {
 	ws?: LambertWebSocketOptions;
-	mongodb?: string;
+	db?: Database<Property>;
 }

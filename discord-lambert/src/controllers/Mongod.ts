@@ -10,8 +10,9 @@ const mongod = new MongoMemoryServer({
 		dbName: "lambert",
 		dbPath,
 		storageEngine: "wiredTiger",
-		auth: true,
+		auth: false,
 		args: [],
+		port: 54618,
 	},
 	autoStart: true,
 });

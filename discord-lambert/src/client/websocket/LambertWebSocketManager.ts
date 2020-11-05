@@ -7,8 +7,8 @@ import { LambertWebSocketShard } from "./LambertWebSocketShard";
 const UNRECOVERABLE_CLOSE_CODES = Object.keys(WSCodes).slice(1).map(Number);
 const UNRESUMABLE_CLOSE_CODES = [1000, 4006, 4007];
 
-// @ts-ignore only for debugging
-globalThis.WebSocketManager = WebSocketManager;
+// @ts-ignore
+global.WebSocketManager = WebSocketManager;
 
 export class LambertWebSocketManager extends WebSocketManager {
 	private sessionIDs: (string | null)[] | null;
@@ -95,6 +95,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 				if (UNRESUMABLE_CLOSE_CODES.includes(event.code)) {
 					// These event codes cannot be resumed
 					shard.sessionID = null;
+					this.client.emit(Events.SHARD_INVALIDATED, event, shard);
 				}
 
 				/**
@@ -113,6 +114,10 @@ export class LambertWebSocketManager extends WebSocketManager {
 					shard.destroy({ reset: true, emit: false, log: false });
 					this.reconnect();
 				}
+			});
+
+			shard.on(ShardEvents.READY, () => {
+				this.client.emit(Events.SHARD_AUTHENTICATED, shard);
 			});
 
 			shard.on(ShardEvents.INVALID_SESSION, () => {

@@ -15,11 +15,11 @@ export class LambertWebSocketShard extends WebSocketShard {
 		}
 
 		switch (packet.t) {
-			case WSEvents.RESUMED: {
+			case WSEvents.RESUMED:
 				this.status = Status.READY;
 
 				this.emit(ShardEvents.ALL_READY);
-			}
+				break;
 		}
 
 		switch (packet.op) {

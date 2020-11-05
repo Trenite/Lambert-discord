@@ -1,7 +1,11 @@
 import { Constants as DJConstants } from "discord.js";
 
-var Constants = { ...DJConstants };
 // @ts-ignore
-Constants.Events = { ...Constants.Events, CLIENT_INIT: "clientInit" };
+const Events = {
+	CLIENT_INIT: "clientInit",
+	SHARD_AUTHENTICATED: "shardAuthenticated",
+	SHARD_INVALIDATED: "shardInvalidated",
+};
+var Constants = { ...DJConstants, Events: { ...DJConstants.Events, ...Events } };
 
 export { Constants };

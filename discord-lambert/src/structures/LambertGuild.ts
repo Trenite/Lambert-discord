@@ -1,16 +1,16 @@
 import { Structures, Guild } from "discord.js";
 import { LambertDiscordClient } from "../client/LambertDiscordClient";
-import Datastore from "./Datastore";
+import { Datastore } from "./Datastore";
 
 export class LambertGuild extends Guild {
-	public data: Datastore;
-
-	constructor(client: LambertDiscordClient, data: any) {
+	constructor(public client: LambertDiscordClient, data: any) {
 		super(client, data);
 
-		console.log("got guild", data);
+		// console.log("got guild", data);
+	}
 
-		this.data = new Datastore(client);
+	public get data() {
+		return Datastore(this.client, [{ name: "guilds", filter: { id: this.id } }, { name: "data" }]);
 	}
 }
 

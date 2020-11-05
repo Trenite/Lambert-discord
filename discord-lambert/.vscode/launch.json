@@ -12,6 +12,13 @@
 			"program": "${workspaceFolder}/dist/test/test.js",
 			"preLaunchTask": "tsc: build - tsconfig.json",
 			"outFiles": ["${workspaceFolder}/dist/**/*.js"]
+		},
+		{
+			"name": "Debug current file",
+			"program": "${file}",
+			"request": "launch",
+			"skipFiles": ["<node_internals>/**"],
+			"type": "node"
 		}
 	]
 }

@@ -5,6 +5,9 @@ import { UserSchema } from "./User";
 import { ActivitySchema } from "./Activity";
 
 export const GuildSchema: Schema = new Schema({
+	id: { type: Snowflake, required: true, unique: true },
+	name: { type: String, required: true },
+	data: Object, // this is where we store the data for a specific member
 	afk_channel_id: Snowflake,
 	afk_timeout: { type: Number, required: true },
 	application_id: Snowflake,
@@ -28,7 +31,6 @@ export const GuildSchema: Schema = new Schema({
 	explicit_content_filter: { type: Number, required: true },
 	features: [{ type: String }],
 	icon: String,
-	id: { type: Snowflake, required: true },
 	joined_at: { type: Date, required: true },
 	large: { type: Boolean, required: true },
 	lazy: Boolean,
@@ -37,6 +39,9 @@ export const GuildSchema: Schema = new Schema({
 	member_count: Number,
 	members: [
 		{
+			id: { type: Snowflake, required: true, unique: true },
+			data: Object, // this is where we store the data for a specific member
+			user: UserSchema,
 			deaf: { type: Boolean, required: true },
 			mute: { type: Boolean, required: true },
 			nick: String,
@@ -44,11 +49,9 @@ export const GuildSchema: Schema = new Schema({
 			premium_since: Date,
 			hoisted_role: Snowflake,
 			roles: [{ type: Snowflake, required: true }],
-			user: UserSchema,
 		},
 	],
 	mfa_level: { type: Number, required: true },
-	name: { type: String, required: true },
 	owner_id: { type: Snowflake, required: true },
 	preferred_locale: { type: String, required: true },
 	premium_subscription_count: Number,

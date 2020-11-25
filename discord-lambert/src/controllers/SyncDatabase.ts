@@ -20,7 +20,7 @@ export class SyncDatabase {
 	};
 
 	SHARD_INVALIDATED = ({ id }: LambertWebSocketShard) => {
-		this.data.shards({ id: id }).sessionID.remove();
+		this.data.shards({ id: id }).sessionID.delete();
 	};
 
 	async READY({ user, guilds, presences }: any) {
@@ -84,7 +84,6 @@ export class SyncDatabase {
 		var { user, member } = this.convertMember(member);
 
 		var res = await this.data.guilds({ id: guild_id }).members({ id: member.id }).set(member);
-		console.log(res);
 		return Promise.all([this.data.users({ id: user.id }).set(user)]);
 	}
 

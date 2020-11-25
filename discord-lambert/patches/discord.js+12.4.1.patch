@@ -51,6 +51,20 @@ index cd43bf7..e09d7d6 100644
    }
  
    _clone() {
+diff --git a/node_modules/discord.js/src/util/Structures.js b/node_modules/discord.js/src/util/Structures.js
+index 0c6ab35..68073b1 100644
+--- a/node_modules/discord.js/src/util/Structures.js
++++ b/node_modules/discord.js/src/util/Structures.js
+@@ -76,7 +76,8 @@ class Structures {
+       throw new TypeError(`The extender function must return the extended structure class/prototype ${received}.`);
+     }
+ 
+-    if (!(extended.prototype instanceof structures[structure])) {
++    if (!(extended.prototype instanceof structures[structure]) && false) {
++      // Mixin class not supported
+       const prototype = Object.getPrototypeOf(extended);
+       const received = `${extended.name || 'unnamed'}${prototype.name ? ` extends ${prototype.name}` : ''}`;
+       throw new Error(
 diff --git a/node_modules/discord.js/typings/index.d.ts b/node_modules/discord.js/typings/index.d.ts
 index 041039f..86a39ea 100644
 --- a/node_modules/discord.js/typings/index.d.ts

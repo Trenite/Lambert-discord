@@ -11,12 +11,8 @@ const UNRESUMABLE_CLOSE_CODES = [1000, 4006, 4007];
 global.WebSocketManager = WebSocketManager;
 
 export class LambertWebSocketManager extends WebSocketManager {
-	private sessionIDs: (string | null)[] | null;
-
 	constructor(client: LambertDiscordClient) {
 		super(client);
-
-		this.sessionIDs = client.options.ws?.sessionIDs || null;
 	}
 
 	protected async connect(): Promise<void> {
@@ -147,7 +143,9 @@ export class LambertWebSocketManager extends WebSocketManager {
 
 		this.manageShard(shard);
 
-		shard.sessionID = this.sessionIDs?.[shard.id] || null;
+		var sessionIDs: any = (<LambertDiscordClient>this.client).options.ws?.sessionIDs || {};
+
+		shard.sessionID = sessionIDs?.[shard.id] || null;
 
 		this.shards.set(shard.id, shard);
 
@@ -158,8 +156,8 @@ export class LambertWebSocketManager extends WebSocketManager {
 				// Undefined if session is invalid, error event for regular closes
 			} else if (!error || error.code) {
 				this.debug("Failed to connect to the gateway, requeueing...", shard);
-				if (this.sessionIDs?.[shard.id]) {
-					this.sessionIDs[shard.id] = null;
+				if (sessionIDs?.[shard.id]) {
+					sessionIDs[shard.id] = null;
 				}
 				this.shardQueue.add(shard);
 			} else {
@@ -173,7 +171,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 				handleError(null);
 				this.createShards();
 			});
-			if (!this.sessionIDs?.[shard.id]) await connect; // await for regular startup
+			if (!sessionIDs?.[shard.id]) await connect; // await for regular startup
 		} catch (error) {
 			handleError(error);
 		}
@@ -181,10 +179,10 @@ export class LambertWebSocketManager extends WebSocketManager {
 		if (this.shardQueue.size) {
 			this.debug(
 				`Shard Queue Size: ${this.shardQueue.size}; ${
-					this.sessionIDs ? "immediate connect all" : "continuing in 5 seconds..."
+					sessionIDs ? "immediate connect all" : "continuing in 5 seconds..."
 				}`
 			);
-			if (!this.sessionIDs?.[shard.id]) {
+			if (!sessionIDs?.[shard.id]) {
 				await Util.delayFor(5000); // regular startup no resuming
 				await this._handleSessionLimit();
 			}

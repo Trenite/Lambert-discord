@@ -6,5 +6,5 @@ export interface Database<P extends Property> {
 	provider: Constructable<P>;
 
 	init(): Promise<any>;
-	close(): any;
+	destroy(): Promise<any>;
 }

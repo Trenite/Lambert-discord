@@ -1,4 +1,4 @@
-import { WebSocketManager, WebSocketOptions, DJSError, Util, WebSocketShard } from "discord.js";
+import { WebSocketManager, WebSocketOptions, DJSError, Util, WebSocketShard, ClientUser, Collection } from "discord.js";
 import { Constants } from "../../structures/Constants";
 const { ShardEvents, Events, WSCodes } = Constants;
 import { LambertDiscordClient } from "../LambertDiscordClient";
@@ -11,8 +11,16 @@ const UNRESUMABLE_CLOSE_CODES = [1000, 4006, 4007];
 global.WebSocketManager = WebSocketManager;
 
 export class LambertWebSocketManager extends WebSocketManager {
+	public readonly client: LambertDiscordClient;
+	public shards: Collection<number, LambertWebSocketShard>;
+	public shardQueue: Set<LambertWebSocketShard>;
+
 	constructor(client: LambertDiscordClient) {
 		super(client);
+
+		if (this.client.options.ws?.sessionIDs) {
+			this.client.options.ws.autoresume = true;
+		}
 	}
 
 	protected async connect(): Promise<void> {
@@ -54,12 +62,40 @@ export class LambertWebSocketManager extends WebSocketManager {
 		this.shardQueue = new Set(shards.map((id) => new LambertWebSocketShard(this, id)));
 
 		await this._handleSessionLimit(remaining, reset_after);
+		if (this.client.options.ws?.autoresume) await this.restoreStructure();
 
 		this.createShards();
 		return;
 	}
 
-	private manageShard(shard: WebSocketShard) {
+	private async restoreStructure() {
+		// client users
+		const clientusers = await this.client.data.user.get();
+
+		// get all guilds for shards and readd them
+		// find guilds with all current shard ids
+		const guilds: any[] = await this.client.data.guilds({ shardID: this.client.options.shards }).get();
+
+		if (clientusers && clientusers[0]) {
+			const user = clientusers[0];
+			if (this.client.user) {
+				// @ts-ignore
+				this.client.user._patch(user);
+			} else {
+				const clientUser = new ClientUser(this.client, user);
+				this.client.user = clientUser;
+				this.client.users.cache.set(clientUser.id, clientUser);
+			}
+		}
+
+		if (guilds && Array.isArray(guilds)) {
+			for (const guild of guilds) {
+				this.client.guilds.add(guild);
+			}
+		}
+	}
+
+	private manageShard(shard: LambertWebSocketShard) {
 		if (!shard.eventsAttached) {
 			shard.on(ShardEvents.ALL_READY, (unavailableGuilds) => {
 				/**
@@ -133,6 +169,11 @@ export class LambertWebSocketManager extends WebSocketManager {
 		}
 	}
 
+	// protected handlePacket(packet: any, shard: LambertWebSocketShard): boolean {
+	// 	packet.shard = shard;
+	// 	return super.handlePacket(packet, shard);
+	// }
+
 	protected async createShards(): Promise<Boolean> {
 		// If we don't have any shards to handle, return
 		if (!this.shardQueue.size) return false;
@@ -191,8 +232,18 @@ export class LambertWebSocketManager extends WebSocketManager {
 
 		return true;
 	}
+
+	public destroy(keepalive: boolean = true) {
+		if (this.destroyed) return;
+		this.debug(`Lambert Websocket Manager was destroyed.`);
+		this.destroyed = true;
+		this.shardQueue.clear();
+		for (const shard of this.shards.values())
+			shard.destroy({ closeCode: 1000, reset: true, emit: false, log: false, keepalive });
+	}
 }
 
 export interface LambertWebSocketOptions extends WebSocketOptions {
 	sessionIDs?: string[];
+	autoresume?: boolean;
 }

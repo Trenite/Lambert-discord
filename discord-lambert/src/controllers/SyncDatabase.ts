@@ -43,7 +43,7 @@ export class SyncDatabase {
 		return { member, user };
 	}
 
-	GUILD_CREATE(guild: any) {
+	GUILD_CREATE(guild: any, shard: LambertWebSocketShard) {
 		var users: any[] = [];
 		var members = guild.members.map((member: any) => {
 			var { member, user } = this.convertMember(member, guild.presences);
@@ -51,7 +51,10 @@ export class SyncDatabase {
 			return member;
 		});
 
-		return Promise.all([this.data.guilds({ id: guild.id }).set({ ...guild, members }), this.data.users.set(users)]);
+		return Promise.all([
+			this.data.guilds({ id: guild.id }).set({ ...guild, members, shardID: shard.id }),
+			this.data.users.set(users),
+		]);
 	}
 
 	GUILD_UPDATE(guild: any) {
@@ -131,15 +134,16 @@ export class SyncDatabase {
 		console.log(user);
 	}
 
-	onRaw = async (packet: any) => {
+	onRaw = async (packet: any, shardID: number) => {
 		if (!packet) return;
 		if (packet.op !== 0) return;
 
 		var EVENT: string = packet.t;
+		var shard = this.client.ws.shards.get(shardID);
 
 		try {
 			// @ts-ignore
-			if (this[EVENT]) return await this[EVENT](packet.d);
+			if (this[EVENT]) return await this[EVENT](packet.d, shard);
 		} catch (error) {
 			console.error(`error syncing database for ${EVENT}`, error);
 		}
@@ -147,5 +151,7 @@ export class SyncDatabase {
 
 	destroy() {
 		this.client.off(Events.RAW, this.onRaw);
+		this.client.off(Events.SHARD_AUTHENTICATED, this.SHARD_AUTHENTICATED);
+		this.client.off(Events.SHARD_INVALIDATED, this.SHARD_INVALIDATED);
 	}
 }

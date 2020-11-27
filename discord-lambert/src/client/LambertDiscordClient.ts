@@ -1,5 +1,5 @@
 require("../structures/LambertExtended");
-import { Client, ClientOptions } from "discord.js";
+import { Client, ClientOptions, PresenceData } from "discord.js";
 import { LambertWebSocketOptions, LambertWebSocketManager } from "./websocket/LambertWebSocketManager";
 import { Constants } from "../structures/Constants";
 import { Registry } from "../structures/Registry";
@@ -17,10 +17,10 @@ export class LambertDiscordClient extends Client {
 	public db: Database<Property>;
 	public intialized: Promise<void>;
 	private dbSync: SyncDatabase;
+	public ws: LambertWebSocketManager;
 
 	constructor(options: LambertClientOptions) {
 		super(options);
-		// @ts-ignore
 
 		this.ws = new LambertWebSocketManager(this);
 		this.registry = new Registry(this);
@@ -32,6 +32,7 @@ export class LambertDiscordClient extends Client {
 		this.dbSync = new SyncDatabase(this);
 
 		this.intialized = this.init();
+		process.on("SIGINT", this.shutdown);
 	}
 
 	public get data() {
@@ -42,12 +43,14 @@ export class LambertDiscordClient extends Client {
 		this.emit(Events.DEBUG, "intializing Lambert client");
 		await Promise.all([this.db.init(), this.server.init()]);
 
-		// const shards = (await this.data.shards.get()) || [];
-		// var sessionIDs: any = {};
-		// shards.forEach((shard: any) => (sessionIDs[shard.id] = shard.sessionID));
+		if (this.options.ws?.autoresume) {
+			const shards = (await this.data.shards.get()) || [];
+			var sessionIDs: any = {};
+			shards.forEach((shard: any) => (sessionIDs[shard.id] = shard.sessionID));
 
-		// if (!this.options.ws) this.options.ws = {};
-		// this.options.ws.sessionIDs = sessionIDs;
+			if (!this.options.ws) this.options.ws = {};
+			this.options.ws.sessionIDs = sessionIDs;
+		}
 
 		this.emit(Events.CLIENT_INIT);
 	}
@@ -57,9 +60,22 @@ export class LambertDiscordClient extends Client {
 		return super.login(token);
 	}
 
-	async destroy() {
+	shutdown = () => {
+		setTimeout(() => {
+			process.exit(1);
+		}, 1000 * 4);
+		this.destroy().finally(() => process.exit());
+	};
+
+	async destroy(keepalive: boolean = true, activity?: PresenceData) {
+		process.off("SIGINT", this.shutdown);
+		if (keepalive) {
+			await this.user?.setPresence(activity || { status: "dnd", activity: { name: "stopped" } }).catch(() => {});
+		}
+		this.ws.destroy(keepalive);
 		super.destroy();
-		return this.db.close();
+
+		// return Promise.all([this.db.destroy(), this.dbSync.destroy()]);
 	}
 }
 
@@ -67,4 +83,18 @@ export interface LambertClientOptions extends ClientOptions {
 	ws?: LambertWebSocketOptions;
 	db?: Database<Property>;
 	server?: LambertServerOptions;
+}
+
+process.on("uncaughtException", criticalError);
+process.on("unhandledRejection", criticalError);
+
+function criticalError(error: Error) {
+	console.error(
+		`
+UNCAUGHT EXCEPTION
+There was a critical exception, however Lambert catched it.
+Please catch this error the next time:
+`,
+		error
+	);
 }

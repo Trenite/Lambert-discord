@@ -2,7 +2,8 @@
 	"name": "lambert",
 	"version": "1.0.0",
 	"description": "",
-	"main": "src/index.js",
+	"main": "dist/index.js",
+	"types": "dist/index.d.ts",
 	"scripts": {
 		"start": "node dist/",
 		"watch": "tsc -w .",
@@ -15,17 +16,24 @@
 	"license": "ISC",
 	"dependencies": {
 		"death": "^1.1.0",
-		"discord.js": "^12.4.1",
+		"discord.js": "github:discordjs/discord.js",
 		"express": "^4.17.1",
 		"flatted": "^3.1.0",
+		"lodash": "^4.17.20",
 		"mongodb": "^3.6.2",
 		"mongodb-memory-server": "^6.9.2",
-		"mongoose": "^5.10.11"
+		"mongoose": "^5.11.8",
+		"node-fetch": "^2.6.1",
+		"signale": "^1.4.0"
 	},
 	"devDependencies": {
 		"@types/express": "^4.17.8",
+		"@types/lodash": "^4.14.165",
+		"@types/mongodb": "^3.5.32",
 		"@types/mongoose": "^5.7.37",
 		"@types/node": "^14.14.6",
+		"@types/node-fetch": "^2.5.7",
+		"@types/signale": "^1.4.1",
 		"nodemon": "^2.0.6",
 		"patch-package": "^6.2.2",
 		"ts-mixer": "^5.3.0",

@@ -1,14 +1,7 @@
-import {
-	ClientUser,
-	Collection,
-	Message,
-	MessageMentions,
-	PartialMessage,
-	TextBasedChannelFields,
-	TextChannel,
-} from "discord.js";
+import { ClientUser, Collection, Message, TextChannel } from "discord.js";
 import { Command } from "../structures/Command";
 import { ERRORS, LambertError } from "../structures/LambertError";
+import { LambertGuildMember } from "../structures/LambertExtended";
 import { LambertMessage } from "../structures/LambertMessage";
 import { LambertDiscordClient } from "./LambertDiscordClient";
 
@@ -46,7 +39,7 @@ export class CommandDispatcher {
 			throw new LambertError(ERRORS.THROTTLED, { user: message.author, time: throttleTime });
 		}
 
-		const botMember = message.guild?.member((<ClientUser>this.client.user).id);
+		const botMember = <LambertGuildMember>message.guild?.members.resolve((<ClientUser>this.client.user).id);
 		if (botMember) await botMember.hasAuths(cmd.clientPermissions, true);
 		if (message.member) await message.member.hasAuths(cmd.userPermissions, true);
 
@@ -55,6 +48,7 @@ export class CommandDispatcher {
 
 		if (!message.guild && cmd.guildOnly) throw new LambertError(ERRORS.GUILD_ONLY, { command, message });
 
+		// get arguments
 		cmd.exec();
 	}
 

@@ -7,15 +7,12 @@ import { LambertWebSocketShard } from "./LambertWebSocketShard";
 const UNRECOVERABLE_CLOSE_CODES = Object.keys(WSCodes).slice(1).map(Number);
 const UNRESUMABLE_CLOSE_CODES = [1000, 4006, 4007];
 
-global.WebSocketManager = WebSocketManager;
-
 export class LambertWebSocketManager extends WebSocketManager {
-	public readonly client: LambertDiscordClient;
-	public shards: Collection<number, LambertWebSocketShard>;
-	public shardQueue: Set<LambertWebSocketShard>;
+	readonly client: LambertDiscordClient;
+	shards: Collection<number, LambertWebSocketShard>;
+	shardQueue: Set<LambertWebSocketShard>;
 
 	constructor(client: LambertDiscordClient) {
-		// @ts-ignore
 		super(client);
 
 		if (this.client.options.ws?.sessionIDs) {
@@ -29,6 +26,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 			url: gatewayURL,
 			shards: recommendedShards,
 			session_start_limit: sessionStartLimit,
+			// @ts-ignore
 		} = await this.client.api.gateway.bot.get().catch((error: any) => {
 			throw error.httpStatus === 401 ? invalidToken : error;
 		});
@@ -173,9 +171,9 @@ export class LambertWebSocketManager extends WebSocketManager {
 	// 	return super.handlePacket(packet, shard);
 	// }
 
-	protected async createShards(): Promise<Boolean> {
+	protected async createShards(): Promise<void> {
 		// If we don't have any shards to handle, return
-		if (!this.shardQueue.size) return false;
+		if (!this.shardQueue.size) return;
 
 		const [shard] = this.shardQueue;
 
@@ -230,7 +228,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 			return this.createShards();
 		}
 
-		return true;
+		return;
 	}
 
 	public destroy(keepalive: boolean = true) {

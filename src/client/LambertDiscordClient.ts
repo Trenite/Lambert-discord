@@ -4,10 +4,8 @@ import { LambertWebSocketOptions, LambertWebSocketManager } from "./websocket/La
 import { Constants } from "../structures/Constants";
 import { SyncDatabase } from "../controllers/SyncDatabase";
 const { Events } = Constants;
-import { Database } from "../controllers/Database";
-import { Provider, Datastore } from "../structures/Provider";
+import { Database, Provider, Datastore, MongoDatabase } from "lambert-orm";
 import { LambertServer, LambertServerOptions } from "../api/LambertServer";
-import { MongoDatabase } from "../controllers/MongodbProvider";
 import { LambertDiscordClientEventLogger, LoggerCollection, LoggerOptions } from "../structures/Logger";
 import { Registry } from "../structures/Registry";
 

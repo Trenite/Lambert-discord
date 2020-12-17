@@ -1,0 +1,1 @@
+{"version":3,"file":"LambertWebhook.d.ts","sourceRoot":"","sources":["../../src/structures/LambertWebhook.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,aAAa,EAAE,gBAAgB,EAAE,qBAAqB,EAAE,UAAU,EAAE,MAAM,YAAY,CAAC;AAGhG,qBAAa,oBAAqB,SAAQ,aAAa;gBAC1C,GAAG,EAAE,MAAM;IAKjB,WAAW,CAChB,EAAE,EAAE,MAAM,EACV,OAAO,EAAE,gBAAgB,GAAG,UAAU,GAAG,qBAAqB,EAC9D,OAAO,CAAC,EAAE,qBAAqB;CAkChC"}

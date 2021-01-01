@@ -1,18 +1,31 @@
-import { Structures, Guild } from "discord.js";
-import { LambertDiscordClient } from "../client/LambertDiscordClient";
-import { Datastore } from "./Provider";
+import { inherits } from "util";
+import { Guild, Base } from "discord.js";
+import { Datastore, ProviderCache } from "lambert-db";
+import { DatastoreInterface } from "lambert-db/dist/Datastore";
 
-export class LambertGuild extends Guild {
-	public _prefix = this.data.prefix.__getProvider().cache;
+declare module "discord.js" {
+	interface Guild {
+		_prefix: ProviderCache;
+		_locale: ProviderCache;
+		prefix: string;
+		data: DatastoreInterface;
+		init(): Promise<any>;
+		destroy(): Promise<any>;
+		_patch(data: any): void;
+	}
+}
 
-	constructor(public client: LambertDiscordClient, data: any) {
-		super(client, data);
+export interface LambertGuild extends Guild {}
 
-		// console.log("got guild", data);
+export class LambertGuild {
+	_patch(data: any) {
 		this.init();
+		return oldPatch.call(this, data);
 	}
 
 	async init() {
+		this._prefix = this.data.prefix.__getProvider().cache;
+		this._locale = this.data.locale.__getProvider().cache;
 		return this._prefix.init();
 	}
 
@@ -20,8 +33,16 @@ export class LambertGuild extends Guild {
 		return this._prefix.get() || this.client.options.commandPrefix;
 	}
 
+	get locale() {
+		return this._locale.get() || this.client.options.defaultLocale;
+	}
+
+	get language() {
+		return;
+	}
+
 	public get data() {
-		return Datastore(this.client, [{ name: "guilds", filter: { id: this.id } }, { name: "data" }]);
+		return Datastore(this.client.db, [{ name: "guilds", filter: { id: this.id } }, { name: "data" }]);
 	}
 
 	async destroy() {
@@ -29,8 +50,10 @@ export class LambertGuild extends Guild {
 	}
 }
 
-// const guilds: any[] = await this.client.data.guilds({ shardID: this.client.options.shards }).get();
+const oldPatch = Guild.prototype._patch;
+Guild.prototype._patch = LambertGuild.prototype._patch;
 
-Structures.extend("Guild", (Guild) => {
-	return LambertGuild;
-});
+inherits(Guild, Base);
+inherits(Guild, LambertGuild);
+
+// const guilds: any[] = await this.client.data.guilds({ shardID: this.client.options.shards }).get();

@@ -1,18 +1,23 @@
-import { Structures, GuildMember, PermissionString, Permissions } from "discord.js";
-import { Mixin } from "ts-mixer";
-import { LambertDiscordClient } from "../client/LambertDiscordClient";
+import { GuildMember, PermissionString, Permissions, Base } from "discord.js";
 import { Auth } from "./Auth";
-import { Datastore } from "./Provider";
-import { LambertGuild } from "./LambertGuild";
-import { LambertError } from "./LambertError";
+import { ERRORS, LambertError } from "./LambertError";
+import { Datastore } from "lambert-db";
+import { DatastoreInterface } from "lambert-db/dist/Datastore";
+import { inherits } from "util";
 
-export class LambertGuildMember extends Mixin(GuildMember, Auth) {
-	constructor(public client: LambertDiscordClient, data: any, guild: LambertGuild) {
-		super(client, data, guild);
+declare module "discord.js" {
+	interface GuildMember extends Auth {
+		data: DatastoreInterface;
+		hasPermission(auth: PermissionString | PermissionString[]): boolean;
 	}
+}
 
+export interface LambertGuildMember extends GuildMember {}
+export interface LambertGuildMember extends Auth {}
+
+export class LambertGuildMember {
 	public get data() {
-		return Datastore(this.client, [
+		return Datastore(this.client.db, [
 			{ name: "guilds", filter: { id: this.guild.id } },
 			{ name: "members", filter: { id: this.id } },
 		]);
@@ -22,13 +27,14 @@ export class LambertGuildMember extends Mixin(GuildMember, Auth) {
 		if (typeof auth === "string") if (!Object.keys(Permissions.FLAGS).includes(auth)) return true;
 		if (Array.isArray(auth)) auth = auth.filter((auth) => Object.keys(Permissions.FLAGS).includes(auth));
 
-		return super.hasPermission(auth);
+		return oldHasPermission(auth);
 	}
 
 	async hasAuth(auth: string, throwError?: boolean) {
-		var hasAuth = await super.hasAuth(auth, throwError);
+		// @ts-ignore
+		var hasAuth = await Auth.prototype.hasAuth.call(this, auth, throwError);
 		var hasPerm = this.hasPermission(<PermissionString>auth);
-		if (throwError && !hasPerm) throw new LambertError("Missing permission", auth);
+		if (throwError && !hasPerm) throw new LambertError(ERRORS.MISSING_PERMISSION, auth);
 		return hasAuth && hasPerm;
 	}
 
@@ -37,13 +43,23 @@ export class LambertGuildMember extends Mixin(GuildMember, Auth) {
 		if (!Array.isArray(auths)) auths = [auths];
 		if (!auths.length) return true;
 
-		var hasAuth = await super.hasAuths(auths, throwError);
+		// @ts-ignore
+		var hasAuth = Auth.prototype.hasAuths.call(this, auths, throwError);
 		var hasPerm = this.hasPermission(<PermissionString[]>auths);
-		if (throwError && !hasPerm) throw new LambertError("Missing Permissions", auths);
+		if (throwError && !hasPerm) throw new LambertError(ERRORS.MISSING_PERMISSIONS, auths);
 		return hasAuth && hasPerm;
 	}
 }
 
-Structures.extend("GuildMember", (GuildMember) => {
-	return LambertGuildMember;
+GuildMember.prototype.hasAuths = LambertGuildMember.prototype.hasAuths;
+GuildMember.prototype.hasAuth = LambertGuildMember.prototype.hasAuth;
+const oldHasPermission = GuildMember.prototype.hasPermission;
+GuildMember.prototype.hasPermission = LambertGuildMember.prototype.hasPermission;
+
+Object.defineProperties(GuildMember.prototype, {
+	hasAuths: Object.getOwnPropertyDescriptor(LambertGuildMember.prototype, "hasAuths"),
+	hasAuth: Object.getOwnPropertyDescriptor(LambertGuildMember.prototype, "hasAuth"),
+	hasPermission: Object.getOwnPropertyDescriptor(LambertGuildMember.prototype, "hasPermission"),
+	data: Object.getOwnPropertyDescriptor(LambertGuildMember.prototype, "data"),
 });
+// TODO: proper patch function (this problem)

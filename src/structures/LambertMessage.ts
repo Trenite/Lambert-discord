@@ -1,18 +1,30 @@
-import { Structures, Message, TextChannel, DMChannel, NewsChannel } from "discord.js";
-import { LambertDiscordClient } from "../client/LambertDiscordClient";
-import { LambertGuild, LambertGuildMember } from "./LambertExtended";
+import { Message, StringResolvable, MessageOptions } from "discord.js";
+import { inherits } from "util";
+import { Command } from "./Command";
+import { AckOptions } from "./CommandInteraction";
 
-export class LambertMessage extends Message {
-	public guild: LambertGuild | null;
-	public readonly member: LambertGuildMember | null;
+declare module "discord.js" {
+	interface Message {
+		prefix?: string; // the prefix if the message triggered a cmd
+		cmdName?: string; // cmdName if the message triggered a cmd
+		cmd?: Command; // the cmd object if the message triggered a cmd
 
-	constructor(client: LambertDiscordClient, data: any, channel: TextChannel | DMChannel | NewsChannel) {
-		super(client, data, channel);
+		ack(options?: AckOptions, content?: StringResolvable, msg?: MessageOptions): Promise<any>;
+	}
+}
+export interface LambertMessage extends Message {}
 
-		// console.log("got Message", data);
+export class LambertMessage {
+	private acknowledged: boolean;
+
+	async ack(options?: AckOptions, content?: StringResolvable, msg?: MessageOptions) {
+		if (this.acknowledged) throw new Error("Already acknowledged message");
+		this.acknowledged = true;
+		if (content && msg) {
+			return this.reply(content, msg);
+		}
+		return;
 	}
 }
 
-Structures.extend("Message", (Message) => {
-	return LambertMessage;
-});
+Message.prototype.ack = LambertMessage.prototype.ack;

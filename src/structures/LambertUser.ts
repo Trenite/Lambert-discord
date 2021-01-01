@@ -1,19 +1,17 @@
-import { Structures, User } from "discord.js";
-import { LambertDiscordClient } from "../client/LambertDiscordClient";
-import { Datastore } from "./Provider";
-import { Mixin } from "ts-mixer";
+import { User, Base } from "discord.js";
 import { Auth } from "./Auth";
+import { Datastore } from "lambert-db";
+import { inherits } from "util";
 
-export class LambertUser extends Mixin(User, Auth) {
-	constructor(public client: LambertDiscordClient, data: any) {
-		super(client, data);
-	}
+export interface LambertUser extends User {}
+export interface LambertUser extends Auth {}
 
+export class LambertUser {
 	public get data() {
-		return Datastore(this.client, [{ name: "users", filter: { id: this.id } }]);
+		return Datastore(this.client.db, [{ name: "users", filter: { id: this.id } }]);
 	}
 }
 
-Structures.extend("User", (User) => {
-	return LambertUser;
-});
+inherits(User, Auth);
+inherits(User, LambertUser);
+inherits(User, Base);

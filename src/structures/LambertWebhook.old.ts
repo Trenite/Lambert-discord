@@ -7,7 +7,7 @@ import {
 	MessageEmbed,
 	WebhookMessageOptions,
 } from "discord.js";
-import { LambertDiscordClient } from "../client/LambertDiscordClient";
+import { LambertDiscordClient } from "./LambertDiscordClient";
 import { getWebhookAuth } from "../util/discord";
 const RESTManager: any = require("../../node_modules/discord.js/src/rest/RESTManager");
 

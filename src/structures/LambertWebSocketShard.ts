@@ -1,13 +1,13 @@
+// @ts-nocheck
+
 import { WebSocketShard, WebSocketManager } from "discord.js";
-import { Constants } from "../../structures/Constants";
+import { Constants } from "./Constants";
 import { LambertWebSocketManager } from "./LambertWebSocketManager";
 const { WSEvents, ShardEvents, OPCodes, WSCodes, Status } = Constants;
 
 export class LambertWebSocketShard extends WebSocketShard {
-	public manager: LambertWebSocketManager;
-
 	constructor(manager: LambertWebSocketManager, id: number) {
-		super(<WebSocketManager>manager, id);
+		super(manager, id);
 	}
 
 	public destroy(opts: any) {
@@ -20,7 +20,7 @@ export class LambertWebSocketShard extends WebSocketShard {
 		}
 	}
 
-	protected onPacket(packet: any): void {
+	private onPacket(packet: any): void {
 		if (!packet) {
 			this.debug(`Received broken packet: '${packet}'.`);
 			return;

@@ -27,6 +27,7 @@ export class LambertWebhookClient extends WebhookClient {
 
 		const { data, files } = await apiMessage.resolveFiles();
 		return (
+			// @ts-ignore
 			this.client.api
 				// @ts-ignore
 				.webhooks(this.id, this.token)

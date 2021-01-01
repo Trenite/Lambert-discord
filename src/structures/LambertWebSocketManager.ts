@@ -1,17 +1,21 @@
+// @ts-nocheck
 import { WebSocketManager, WebSocketOptions, DJSError, Util, WebSocketShard, ClientUser, Collection } from "discord.js";
-import { Constants } from "../../structures/Constants";
+import DJSError from "discord.js/src/errors/DJSError";
+import { Constants } from "./Constants";
 const { ShardEvents, Events, WSCodes } = Constants;
-import { LambertDiscordClient } from "../LambertDiscordClient";
+import { LambertDiscordClient } from "./LambertDiscordClient";
 import { LambertWebSocketShard } from "./LambertWebSocketShard";
 
 const UNRECOVERABLE_CLOSE_CODES = Object.keys(WSCodes).slice(1).map(Number);
 const UNRESUMABLE_CLOSE_CODES = [1000, 4006, 4007];
 
-export class LambertWebSocketManager extends WebSocketManager {
-	readonly client: LambertDiscordClient;
-	shards: Collection<number, LambertWebSocketShard>;
-	shardQueue: Set<LambertWebSocketShard>;
+declare module "discord.js" {
+	interface WebSocketManager {
+		destroy(keepalive?: number): void;
+	}
+}
 
+export class LambertWebSocketManager extends WebSocketManager {
 	constructor(client: LambertDiscordClient) {
 		super(client);
 
@@ -20,7 +24,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 		}
 	}
 
-	protected async connect(): Promise<void> {
+	private async connect(): Promise<void> {
 		const invalidToken = new DJSError(WSCodes[4004]);
 		const {
 			url: gatewayURL,
@@ -231,7 +235,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 		return;
 	}
 
-	public destroy(keepalive: boolean = true) {
+	protected destroy(keepalive: boolean = true) {
 		if (this.destroyed) return;
 		this.debug(`Lambert Websocket Manager was destroyed.`);
 		this.destroyed = true;

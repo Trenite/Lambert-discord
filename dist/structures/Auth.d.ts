@@ -5,4 +5,3 @@ export declare class Auth {
     setAuth(auth: string, value: boolean): Promise<boolean>;
     getAuths(): Promise<any>;
 }
-//# sourceMappingURL=Auth.d.ts.map

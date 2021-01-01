@@ -1,1 +1,0 @@
-{"version":3,"file":"LambertError.d.ts","sourceRoot":"","sources":["../../src/structures/LambertError.ts"],"names":[],"mappings":"AAAA,qBAAa,YAAa,SAAQ,KAAK;IACnB,IAAI,EAAE,MAAM;IAAS,IAAI,EAAE,GAAG;gBAA9B,IAAI,EAAE,MAAM,EAAS,IAAI,EAAE,GAAG;CAGjD;AAED,oBAAY,MAAM;IACjB,gBAAgB,IAAA;IAChB,SAAS,IAAA;IACT,UAAU,IAAA;CACV"}

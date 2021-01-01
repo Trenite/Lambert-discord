@@ -1,5 +1,11 @@
+/// <reference path="LambertWebSocketManager.d.ts" />
+/// <reference path="LambertMessage.d.ts" />
+/// <reference path="LambertGuild.d.ts" />
+/// <reference path="LambertGuildMember.d.ts" />
+/// <reference path="Registry.d.ts" />
+/// <reference path="LambertDiscordClient.d.ts" />
 import { Message, StringResolvable, WebhookMessageOptions } from "discord.js";
-import { LambertDiscordClient } from "../client/LambertDiscordClient";
+import { LambertDiscordClient } from "./LambertDiscordClient";
 declare const RESTManager: any;
 export declare class LambertWebhook {
     readonly url: string;
@@ -35,4 +41,3 @@ export declare class WebhookMessage extends Message {
 export declare class WebhookChannel {
 }
 export {};
-//# sourceMappingURL=LambertWebhook.old.d.ts.map

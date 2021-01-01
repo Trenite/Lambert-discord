@@ -1,4 +1,5 @@
 import { Collection } from "discord.js";
+import { LambertDiscordClient } from "..";
 import { Module } from "./Module";
 export declare const HandlerEvents: {
     LOAD: string;
@@ -10,18 +11,20 @@ export declare const HandlerEvents: {
     REMOVEALL: string;
     ERROR: string;
 };
+export declare type HandlerOptions = {
+    id: string;
+};
 export declare class Handler<Holds extends Module> extends Module {
-    readonly modules: Collection<string, Module | Handler<Holds>>;
-    constructor(id: string);
-    init(): Promise<any>;
+    readonly client?: LambertDiscordClient;
+    readonly modules: Collection<string, Holds>;
+    constructor({ id }: HandlerOptions);
     loadAll(dir: string): Promise<void>;
-    load(path: string): Module;
-    register(mod: Module): Promise<void>;
+    load(path: string): Holds;
+    register(mod: Holds): Promise<Holds>;
     reload(id: string): Promise<void>;
-    getModule(id: string): Module | undefined;
+    getModule(id: string): Holds | undefined;
     reloadAll(): Promise<void>;
     remove(id: string): Promise<void>;
     removeAll(): Promise<void>;
     destroy(): Promise<void>;
 }
-//# sourceMappingURL=Handler.d.ts.map

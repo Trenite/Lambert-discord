@@ -1,0 +1,154 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SyncDatabase = void 0;
+const Constants_1 = require("./Constants");
+const { Events, WSEvents } = Constants_1.Constants;
+class SyncDatabase {
+    constructor(client) {
+        this.client = client;
+        // @ts-ignore
+        this.SHARD_AUTHENTICATED = ({ sessionID, id }) => {
+            this.data.shards({ id: id }).set({ sessionID });
+        };
+        this.SHARD_INVALIDATED = ({ id }) => {
+            this.data.shards({ id: id }).sessionID.delete();
+        };
+        this.onRaw = (packet, shardID) => __awaiter(this, void 0, void 0, function* () {
+            if (!packet)
+                return;
+            if (packet.op !== 0)
+                return;
+            var EVENT = packet.t;
+            var shard = this.client.ws.shards.get(shardID);
+            try {
+                // @ts-ignore
+                if (this[EVENT])
+                    return yield this[EVENT](packet.d, shard);
+            }
+            catch (error) {
+                console.error(`error syncing database for ${EVENT}`, error);
+            }
+        });
+    }
+    init() {
+        this.client.on(Events.RAW, this.onRaw);
+        this.client.on(Events.SHARD_AUTHENTICATED, this.SHARD_AUTHENTICATED);
+        this.client.on(Events.SHARD_INVALIDATED, this.SHARD_INVALIDATED);
+    }
+    get data() {
+        return this.client.data;
+    }
+    READY({ user, guilds, presences }) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield Promise.all([this.data.user.set(user), this.data.guilds.set(guilds)]);
+        });
+    }
+    convertMember(member, presences = []) {
+        member = Object.assign({}, member);
+        var presence = presences.find((p) => p.user.id === member.user.id);
+        if (!presence)
+            presence = { status: "offline" };
+        else
+            presence = Object.assign({}, presence);
+        delete presence.user;
+        var user = Object.assign(Object.assign({}, member.user), { presence });
+        member.id = member.user.id;
+        delete member.user;
+        delete member.guild_id;
+        return { member, user };
+    }
+    GUILD_CREATE(guild, shard) {
+        var users = [];
+        var members = guild.members.map((member) => {
+            var { member, user } = this.convertMember(member, guild.presences);
+            users.push(user);
+            return member;
+        });
+        return Promise.all([
+            this.data.guilds({ id: guild.id }).set(Object.assign(Object.assign({}, guild), { members, shardID: shard.id })),
+            this.data.users.set(users),
+        ]);
+    }
+    GUILD_UPDATE(guild) {
+        return this.data.guilds({ id: guild.id }).set(guild);
+    }
+    GUILD_DELETE(guild) {
+        return this.data.guilds({ id: guild.id }).delete();
+    }
+    GUILD_MEMBER_ADD(member) {
+        member = Object.assign({}, member);
+        var { guild_id } = member;
+        var { user, member } = this.convertMember(member);
+        return Promise.all([
+            this.data.guilds({ id: guild_id }).members.push(member),
+            this.data.users({ id: user.id }).set(user),
+        ]);
+    }
+    GUILD_MEMBER_REMOVE({ guild_id, user }) {
+        return this.data.guilds({ id: guild_id }).members({ id: user.id }).delete();
+    }
+    GUILD_MEMBER_UPDATE(member) {
+        var user, member;
+        return __awaiter(this, void 0, void 0, function* () {
+            // Sent when a guild member is updated. This will also fire when the user object of a guild member changes.
+            member = Object.assign({}, member);
+            var { guild_id } = member;
+            ({ user, member } = this.convertMember(member));
+            var res = yield this.data.guilds({ id: guild_id }).members({ id: member.id }).set(member);
+            return Promise.all([this.data.users({ id: user.id }).set(user)]);
+        });
+    }
+    GUILD_MEMBERS_CHUNK({ members, presences = [], chunk_count, chunk_index, guild_id }) {
+        var users = [];
+        var members = members.map((member) => {
+            var { member, user } = this.convertMember(member, presences);
+            users.push(user);
+        });
+        return Promise.all([this.data.guilds({ id: guild_id }).members.set(members), this.data.users.set(users)]);
+    }
+    GUILD_ROLE_CREATE(role) {
+        role = Object.assign({}, role);
+        console.log(role);
+    }
+    GUILD_ROLE_DELETE(role) {
+        role = Object.assign({}, role);
+        console.log(role);
+    }
+    GUILD_ROLE_UPDATE(role) {
+        role = Object.assign({}, role);
+        console.log(role);
+    }
+    INVITE_CREATE(invite) {
+        invite = Object.assign({}, invite);
+        console.log(invite);
+    }
+    INVITE_DELETE(invite) {
+        invite = Object.assign({}, invite);
+        console.log(invite);
+    }
+    PRESENCE_UPDATE(member) {
+        member = Object.assign({}, member);
+        var { status, client_status, activities, game, user } = member;
+        return this.data.users({ id: user.id }).presence.set({ status, client_status, activities, game });
+    }
+    USER_UPDATE(user) {
+        user = Object.assign({}, user);
+        console.log(user);
+    }
+    destroy() {
+        this.client.off(Events.RAW, this.onRaw);
+        this.client.off(Events.SHARD_AUTHENTICATED, this.SHARD_AUTHENTICATED);
+        this.client.off(Events.SHARD_INVALIDATED, this.SHARD_INVALIDATED);
+    }
+}
+exports.SyncDatabase = SyncDatabase;
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiU3luY0RhdGFiYXNlLmpzIiwic291cmNlUm9vdCI6IiIsInNvdXJjZXMiOlsiLi4vLi4vc3JjL3N0cnVjdHVyZXMvU3luY0RhdGFiYXNlLnRzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiI7Ozs7Ozs7Ozs7OztBQUFBLDJDQUF3QztBQUd4QyxNQUFNLEVBQUUsTUFBTSxFQUFFLFFBQVEsRUFBRSxHQUFHLHFCQUFTLENBQUM7QUFFdkMsTUFBYSxZQUFZO0lBQ3hCLFlBQW1CLE1BQTRCO1FBQTVCLFdBQU0sR0FBTixNQUFNLENBQXNCO1FBWS9DLGFBQWE7UUFDYix3QkFBbUIsR0FBRyxDQUFDLEVBQUUsU0FBUyxFQUFFLEVBQUUsRUFBeUIsRUFBRSxFQUFFO1lBQ2xFLElBQUksQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLEVBQUUsRUFBRSxFQUFFLEVBQUUsRUFBRSxDQUFDLENBQUMsR0FBRyxDQUFDLEVBQUUsU0FBUyxFQUFFLENBQUMsQ0FBQztRQUNqRCxDQUFDLENBQUM7UUFFRixzQkFBaUIsR0FBRyxDQUFDLEVBQUUsRUFBRSxFQUF5QixFQUFFLEVBQUU7WUFDckQsSUFBSSxDQUFDLElBQUksQ0FBQyxNQUFNLENBQUMsRUFBRSxFQUFFLEVBQUUsRUFBRSxFQUFFLENBQUMsQ0FBQyxTQUFTLENBQUMsTUFBTSxFQUFFLENBQUM7UUFDakQsQ0FBQyxDQUFDO1FBaUhGLFVBQUssR0FBRyxDQUFPLE1BQVcsRUFBRSxPQUFlLEVBQUUsRUFBRTtZQUM5QyxJQUFJLENBQUMsTUFBTTtnQkFBRSxPQUFPO1lBQ3BCLElBQUksTUFBTSxDQUFDLEVBQUUsS0FBSyxDQUFDO2dCQUFFLE9BQU87WUFFNUIsSUFBSSxLQUFLLEdBQVcsTUFBTSxDQUFDLENBQUMsQ0FBQztZQUM3QixJQUFJLEtBQUssR0FBRyxJQUFJLENBQUMsTUFBTSxDQUFDLEVBQUUsQ0FBQyxNQUFNLENBQUMsR0FBRyxDQUFDLE9BQU8sQ0FBQyxDQUFDO1lBRS9DLElBQUk7Z0JBQ0gsYUFBYTtnQkFDYixJQUFJ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

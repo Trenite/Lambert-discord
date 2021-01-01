@@ -1,1 +1,0 @@
-{"version":3,"file":"CommandDispatcher.d.ts","sourceRoot":"","sources":["../../src/client/CommandDispatcher.ts"],"names":[],"mappings":"AAAA,OAAO,EAGN,OAAO,EAKP,MAAM,YAAY,CAAC;AAIpB,OAAO,EAAE,oBAAoB,EAAE,MAAM,wBAAwB,CAAC;AAE9D,qBAAa,iBAAiB;IAEjB,OAAO,CAAC,MAAM;IAD1B,OAAO,CAAC,WAAW,CAAiD;gBAChD,MAAM,EAAE,oBAAoB;IAEhD,IAAI;IAIE,SAAS,CAAC,CAAC,EAAE,OAAO;IAsC1B,OAAO;CAGP"}

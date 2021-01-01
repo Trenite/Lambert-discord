@@ -1,3 +1,9 @@
+/// <reference path="LambertWebSocketManager.d.ts" />
+/// <reference path="LambertMessage.d.ts" />
+/// <reference path="LambertGuild.d.ts" />
+/// <reference path="LambertGuildMember.d.ts" />
+/// <reference path="Registry.d.ts" />
+/// <reference path="LambertDiscordClient.d.ts" />
 /// <reference types="node" />
 /// <reference types="discord.js" />
 declare var Constants: {
@@ -95,7 +101,7 @@ declare var Constants: {
         };
     };
     DefaultOptions: import("discord.js").ClientOptions;
-    UserAgent: string | null;
+    UserAgent: string;
     Endpoints: {
         botGateway: string;
         invite: (root: string, code: string) => string;
@@ -103,9 +109,9 @@ declare var Constants: {
             Asset: (name: string) => string;
             DefaultAvatar: (id: string | number) => string;
             Emoji: (emojiID: string, format: "png" | "gif") => string;
-            Avatar: (userID: string | number, hash: string, format: "default" | "webp" | "png" | "jpg" | "jpeg" | "gif", size: number) => string;
+            Avatar: (userID: string | number, hash: string, format: "default" | "jpg" | "jpeg" | "png" | "gif" | "webp", size: number) => string;
             Banner: (guildID: string | number, hash: string, format: import("discord.js").AllowedImageFormat, size: number) => string;
-            Icon: (userID: string | number, hash: string, format: "default" | "webp" | "png" | "jpg" | "jpeg" | "gif", size: number) => string;
+            Icon: (userID: string | number, hash: string, format: "default" | "jpg" | "jpeg" | "png" | "gif" | "webp", size: number) => string;
             AppIcon: (userID: string | number, hash: string, format: import("discord.js").AllowedImageFormat, size: number) => string;
             AppAsset: (userID: string | number, hash: string, format: import("discord.js").AllowedImageFormat, size: number) => string;
             GDMIcon: (userID: string | number, hash: string, format: import("discord.js").AllowedImageFormat, size: number) => string;
@@ -266,4 +272,3 @@ declare var Constants: {
     MembershipStates: "INVITED" | "ACCEPTED";
 };
 export { Constants };
-//# sourceMappingURL=Constants.d.ts.map

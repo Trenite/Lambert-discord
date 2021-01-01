@@ -1,12 +1,15 @@
 /// <reference types="node" />
-import { LambertDiscordClient } from "../client/LambertDiscordClient";
-import { Application, Router } from "express";
+import { LambertDiscordClient } from "../structures/LambertDiscordClient";
+import express, { Application, NextFunction, Request, Response, Router } from "express";
 import { Server } from "http";
+import "express-async-errors";
+import { Handler } from "../structures/Handler";
+import { Module } from "../structures/Module";
 export interface LambertServerOptions {
     port?: number;
     host?: string;
 }
-export declare class LambertServer {
+export declare class LambertServer extends Handler<Module> {
     client: LambertDiscordClient;
     options: LambertServerOptions;
     app: Application;
@@ -14,7 +17,8 @@ export declare class LambertServer {
     paths: Map<string, Router>;
     constructor(client: LambertDiscordClient, options?: LambertServerOptions);
     init(): Promise<void>;
-    registerRoutes(root: string): Promise<any[]>;
+    handleError(error: string | Error, req: Request, res: Response, next: NextFunction): express.Response<any>;
+    registerRoutes(root: string): Promise<unknown[]>;
     /**
      * @param root - The path from / to the actual routes directory -> Automatically creates a Router based on dir structure
      * @param file - The complete path to the file
@@ -22,4 +26,3 @@ export declare class LambertServer {
     registerRoute(root: string, file: string): any;
     destroy(): Promise<void>;
 }
-//# sourceMappingURL=LambertServer.d.ts.map

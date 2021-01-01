@@ -2,20 +2,16 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.LambertUser = void 0;
 const discord_js_1 = require("discord.js");
-const Provider_1 = require("./Provider");
-const ts_mixer_1 = require("ts-mixer");
 const Auth_1 = require("./Auth");
-class LambertUser extends ts_mixer_1.Mixin(discord_js_1.User, Auth_1.Auth) {
-    constructor(client, data) {
-        super(client, data);
-        this.client = client;
-    }
+const lambert_db_1 = require("lambert-db");
+const util_1 = require("util");
+class LambertUser {
     get data() {
-        return Provider_1.Datastore(this.client, [{ name: "users", filter: { id: this.id } }]);
+        return lambert_db_1.Datastore(this.client.db, [{ name: "users", filter: { id: this.id } }]);
     }
 }
 exports.LambertUser = LambertUser;
-discord_js_1.Structures.extend("User", (User) => {
-    return LambertUser;
-});
-//# sourceMappingURL=LambertUser.js.map
+util_1.inherits(discord_js_1.User, Auth_1.Auth);
+util_1.inherits(discord_js_1.User, LambertUser);
+util_1.inherits(discord_js_1.User, discord_js_1.Base);
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiTGFtYmVydFVzZXIuanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi8uLi9zcmMvc3RydWN0dXJlcy9MYW1iZXJ0VXNlci50cyJdLCJuYW1lcyI6W10sIm1hcHBpbmdzIjoiOzs7QUFBQSwyQ0FBd0M7QUFDeEMsaUNBQThCO0FBQzlCLDJDQUF1QztBQUN2QywrQkFBZ0M7QUFLaEMsTUFBYSxXQUFXO0lBQ3ZCLElBQVcsSUFBSTtRQUNkLE9BQU8sc0JBQVMsQ0FBQyxJQUFJLENBQUMsTUFBTSxDQUFDLEVBQUUsRUFBRSxDQUFDLEVBQUUsSUFBSSxFQUFFLE9BQU8sRUFBRSxNQUFNLEVBQUUsRUFBRSxFQUFFLEVBQUUsSUFBSSxDQUFDLEVBQUUsRUFBRSxFQUFFLENBQUMsQ0FBQyxDQUFDO0lBQ2hGLENBQUM7Q0FDRDtBQUpELGtDQUlDO0FBRUQsZUFBUSxDQUFDLGlCQUFJLEVBQUUsV0FBSSxDQUFDLENBQUM7QUFDckIsZUFBUSxDQUFDLGlCQUFJLEVBQUUsV0FBVyxDQUFDLENBQUM7QUFDNUIsZUFBUSxDQUFDLGlCQUFJLEVBQUUsaUJBQUksQ0FBQyxDQUFDIn0=

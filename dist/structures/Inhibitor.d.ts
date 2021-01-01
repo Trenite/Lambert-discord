@@ -3,6 +3,7 @@ import { Collection } from "discord.js";
 import { EventEmitter } from "events";
 import { Handler } from "./Handler";
 import { Module } from "./Module";
+import "missing-native-js-functions";
 export declare class InhibitorHandler extends Handler<Inhibitor> {
     readonly emitter: EventEmitter;
     readonly modules: Collection<string, Inhibitor | InhibitorHandler>;
@@ -14,4 +15,3 @@ export declare class InhibitorHandler extends Handler<Inhibitor> {
 export interface Inhibitor extends Module {
     test(event: string, ...args: any[]): Promise<boolean> | boolean;
 }
-//# sourceMappingURL=Inhibitor.d.ts.map

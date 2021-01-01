@@ -1,1 +1,0 @@
-{"version":3,"file":"ArgumentType.d.ts","sourceRoot":"","sources":["../../src/structures/ArgumentType.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,cAAc,EAAE,MAAM,kBAAkB,CAAC;AAElD,qBAAa,YAAY;aACI,IAAI,EAAE,MAAM;gBAAZ,IAAI,EAAE,MAAM;IAExC,QAAQ,CAAC,GAAG,EAAE,MAAM,EAAE,GAAG,EAAE,cAAc;CACzC"}

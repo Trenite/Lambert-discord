@@ -1,5 +1,6 @@
 import { Collection } from "discord.js";
 import fs from "fs/promises";
+import { LambertDiscordClient } from "..";
 import { Module } from "./Module";
 
 export const HandlerEvents = {
@@ -13,15 +14,16 @@ export const HandlerEvents = {
 	ERROR: "error",
 };
 
+export type HandlerOptions = { id: string; json: boolean };
+
 export class Handler<Holds extends Module> extends Module {
-	public readonly modules: Collection<string, Module | Handler<Holds>> = new Collection();
+	public readonly client?: LambertDiscordClient;
+	public readonly modules: Collection<string, Holds> = new Collection();
+	private loadJson: boolean;
 
-	constructor(id: string) {
+	constructor({ id, json }: HandlerOptions) {
 		super({ id });
-	}
-
-	async init(): Promise<any> {
-		return Promise.all(this.modules.map((x) => x.init()));
+		this.loadJson = json;
 	}
 
 	async loadAll(dir: string) {
@@ -31,20 +33,23 @@ export class Handler<Holds extends Module> extends Module {
 
 		await Promise.all(
 			filesDirs.map(async (file) => {
+				let path = dir + file.name;
 				try {
-					let path = dir + file.name;
 					let stat = await fs.lstat(path);
 					if (stat.isDirectory()) {
-						// automatically make a category
-						let mod = new Handler<Holds>(file.name);
-						await mod.loadAll(path);
-						return this.register(mod);
+						return await this.loadAll(path);
 					}
-					if (!stat.isFile() || !path.endsWith(".js")) return;
+					const fileTypes = ["js"];
+					const extension = path.split(".").last();
+
+					if (this.loadJson) fileTypes.push("json");
+					if (!stat.isFile() || !fileTypes.includes(extension)) return;
 
 					let mod = this.load(path);
 					return this.register(mod);
-				} catch (error) {}
+				} catch (error) {
+					console.error("error loading file: " + path, error);
+				}
 			})
 		);
 	}
@@ -57,15 +62,19 @@ export class Handler<Holds extends Module> extends Module {
 			if (k.length) file = file[k.first()];
 		}
 		let exportedClass = file;
+		var mod: Holds;
 
-		let mod: Module = new exportedClass();
+		if (isClass(exportedClass)) mod = new exportedClass(this);
+		else mod = exportedClass;
+
+		if (!mod.id) mod.id = path;
 		mod.filepath = path;
 
 		this.emit(HandlerEvents.LOAD, path);
 		return mod;
 	}
 
-	async register(mod: Module) {
+	async register(mod: Holds) {
 		if (!mod) throw new Error("Module must not be undefined");
 		if (!(mod instanceof Module)) throw new Error("Class must extend Module");
 		if (this.modules.get(mod.id)) throw new Error("Module already exists: " + mod.id);
@@ -74,28 +83,23 @@ export class Handler<Holds extends Module> extends Module {
 		await mod.init();
 		this.modules.set(mod.id, mod);
 		this.emit(HandlerEvents.REGISTER, mod);
+		return mod;
 	}
 
 	async reload(id: string): Promise<void> {
-		const mod = this.modules.get(id);
+		const mod: Holds = this.modules.get(id);
 		if (!mod) throw new Error("Module not found");
-		let handler = <Handler<Holds>>mod;
-		if (!mod.filepath) {
-			if (handler && handler.modules) {
-				await Promise.all(handler.modules.map((x) => handler.reload(x.id)));
-				return;
-			} else throw new Error("Module not reloadable");
-		}
 
 		await this.remove(id);
 		await this.register(this.load(mod.filepath));
 		this.emit(HandlerEvents.RELOAD, id);
 	}
 
-	getModule(id: string): Module | undefined {
+	getModule(id: string): Holds | undefined {
 		return (
-			super.getModule(id) ||
+			<Holds>super.getModule(id) ||
 			this.modules.find((x) => {
+				if (!x || !x.getModule) return;
 				return <boolean>(<unknown>x.getModule(id));
 			})
 		);
@@ -121,7 +125,7 @@ export class Handler<Holds extends Module> extends Module {
 	}
 
 	async removeAll() {
-		await Promise.all(this.modules.keyArray().map(this.remove));
+		await Promise.all(this.modules.keyArray().map((x) => this.remove(x)));
 		this.emit(HandlerEvents.REMOVEALL);
 	}
 
@@ -129,4 +133,16 @@ export class Handler<Holds extends Module> extends Module {
 		await super.destroy();
 		await this.removeAll();
 	}
+}
+
+function isClass(obj: any) {
+	const isCtorClass = obj.constructor && obj.constructor.toString().substring(0, 5) === "class";
+	if (obj.prototype === undefined) {
+		return isCtorClass;
+	}
+	const isPrototypeCtorClass =
+		obj.prototype.constructor &&
+		obj.prototype.constructor.toString &&
+		obj.prototype.constructor.toString().substring(0, 5) === "class";
+	return isCtorClass || isPrototypeCtorClass;
 }

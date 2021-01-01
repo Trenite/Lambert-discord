@@ -1,15 +1,16 @@
 import { EventEmitter } from "events";
 import { Handler } from "./Handler";
 
+export type ModuleOptions = { id: string; filepath?: string };
 export class Module extends EventEmitter {
 	public handler?: Handler<this>;
 	public filepath?: string;
 	public id: string;
 	protected intialized = false;
 
-	constructor(props: { id: string; filepath?: string }) {
+	constructor(props: ModuleOptions) {
 		super();
-		this.id = props.id;
+		this.id = props.id.toLowerCase();
 		this.filepath = props.filepath;
 	}
 

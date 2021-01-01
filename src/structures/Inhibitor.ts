@@ -1,16 +1,15 @@
 import { Collection } from "discord.js";
 import { EventEmitter } from "events";
-import { init } from "../util/JavaScript";
 import { Handler } from "./Handler";
 import { Module } from "./Module";
-init();
+import "missing-native-js-functions";
 
 export class InhibitorHandler extends Handler<Inhibitor> {
 	public readonly modules: Collection<string, Inhibitor | InhibitorHandler> = new Collection();
 	private readonly passthrough: Function;
 
 	constructor(public readonly emitter: EventEmitter) {
-		super(emitter.constructor.name);
+		super({ id: emitter.constructor.name });
 
 		this.passthrough = emitter.emit;
 		this.onEmit = this.onEmit.bind(this);

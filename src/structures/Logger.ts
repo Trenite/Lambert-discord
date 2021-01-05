@@ -158,17 +158,17 @@ export class WebhookLogger {
 			options.embeds.last().description =
 				"```\n" + this.lastMessage?.embeds.first()?.description?.slice(4, -4) + "\n" + val + "\n```";
 
-			promise = this.webhook.editMessage(this.lastMessage.id, options);
+			promise = this.webhook?.editMessage(this.lastMessage.id, options);
 			// @ts-ignore
 			this.lastMessage = { ...this.lastMessage, embeds: options.embeds, level };
 		} else {
-			promise = this.webhook.send(options).then((e) => {
+			promise = this.webhook?.send(options).then((e) => {
 				// @ts-ignore
 				this.lastMessage = { ...e, level };
 			});
 		}
 
-		await promise.catch((e) => {
+		await promise?.catch((e) => {
 			// CANT LOG -> infinite recursion
 			// console.error("there was an error sending logs to the webhook\n", e);
 		});

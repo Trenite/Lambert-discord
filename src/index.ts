@@ -1,13 +1,15 @@
 import { LambertDiscordClient } from "./structures/LambertDiscordClient";
-import { LambertWebSocketManager } from "./structures/LambertWebSocketManager";
-import { LambertWebSocketShard } from "./structures/LambertWebSocketShard";
 import { SyncDatabase } from "./structures/SyncDatabase";
 import { Command } from "./structures/Command";
 import { Constants } from "./structures/Constants";
 import { Inhibitor } from "./structures/Inhibitor";
-import { LambertGuildMember } from "./structures/LambertExtended";
-import { LambertGuild } from "./structures/LambertGuild";
-import { LambertMessage } from "./structures/LambertMessage";
+import {
+	LambertGuildMember,
+	LambertGuild,
+	LambertMessage,
+	LambertWebSocketManager,
+	LambertWebSocketShard,
+} from "./structures/LambertExtended";
 import { Listener } from "./structures/Listener";
 
 export {

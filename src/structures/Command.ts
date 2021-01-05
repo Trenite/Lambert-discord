@@ -1,11 +1,13 @@
+import { Message, ClientUser, TextChannel } from "discord.js";
 import { LambertDiscordClient } from "./LambertDiscordClient";
 import { Argument, ArgumentOptions } from "./Argument";
 import { Handler } from "./Handler";
 import { LambertMessage } from "./LambertExtended";
 import { LambertPermissionResolvable } from "./LambertPermission";
-import { Message } from "discord.js";
 import { ApplicationCommand, ApplicationCommandOptionChoice } from "./ApplicationCommand";
 import { ApplicationCommandInteractionDataOption, CommandInteraction, CommandTrigger } from "./CommandInteraction";
+import { ERRORS, LambertError } from "./LambertError";
+import { LambertGuildMember } from "./LambertGuildMember";
 
 export type ThrottlingOptions = {
 	usages: number;
@@ -91,6 +93,18 @@ export abstract class Command extends Handler<Command> {
 		}
 	}
 
+	public _exec(trigger: CommandTrigger, args: any): Promise<any> | any {
+		for (const key in args) {
+			const val = args[key];
+			if (!val) continue;
+			const arg = this.args.find((x) => x.id === key);
+			if (!arg) continue;
+			if (arg.type.id === "subcommmand") {
+				return val.subcommand._exec(trigger, val.subargs);
+			}
+		}
+	}
+
 	public exec(trigger: CommandTrigger, args: any): Promise<any> | any {
 		throw new Error("Please make a exec() method in command " + this.id);
 	}
@@ -144,35 +158,56 @@ export abstract class Command extends Handler<Command> {
 		if (this.aliases.includes(id)) return this;
 	}
 
-	async getArgs({
-		cmd,
-		trigger,
-		args,
-	}: {
-		cmd: Command;
-		trigger: CommandTrigger;
-		args: Record<string, Argument> | string;
-	}) {
+	async check(trigger: CommandTrigger) {
+		const throttleTime = this.throttle((<Message>trigger).author?.id || trigger.member?.id);
+		if (throttleTime) {
+			throw new LambertError(ERRORS.THROTTLED, { user: trigger, time: throttleTime });
+		}
+
+		const botMember = <LambertGuildMember | null>trigger.guild?.members.resolve((<ClientUser>this.client.user).id);
+		if (botMember) await botMember.hasAuths(this.clientPermissions, true);
+		if (trigger.member) await trigger.member.hasAuths(this.userPermissions, true);
+
+		if ((<TextChannel>trigger.channel).nsfw && !this.nsfw)
+			throw new LambertError(ERRORS.NOT_A_NSFW_CHANNEL, { command: this, trigger, channel: trigger.channel });
+
+		if (!trigger.guild && this.guildOnly) throw new LambertError(ERRORS.GUILD_ONLY, { command: this, trigger });
+	}
+
+	async getArgs({ trigger, args }: { trigger: CommandTrigger; args: Record<string, Argument> | string }) {
+		let parsedArgs: Record<string, any> = {};
 		if (trigger instanceof Message) {
 			args = <string>args;
 			let parts = args.match(ARGSSPLIT);
-			let parsedArgs: Record<string, any> = {};
 
-			parts
+			const wait = parts
 				.map((arg, index) => {
-					if (index == cmd.args.length - 1) return parts.slice(index).map(trim).join(" ");
+					if (index == this.args.length - 1) return parts.slice(index).map(trim).join(" ");
 					return parts[index];
 				})
-				.forEach((x, index) => {
-					let arg = cmd.args[index];
-					parsedArgs[arg.id] = arg.type.parse({ val: trim(x), trigger, cmd });
+				.map(async (x, index) => {
+					let arg = this.args[index];
+					parsedArgs[arg.id] = await arg.type.parse({ val: trim(x), trigger, cmd: this });
 				});
 
-			return parsedArgs;
+			await Promise.all(wait);
 		} else if (trigger instanceof CommandInteraction) {
-			return await trigger.getArgs();
+			parsedArgs = await trigger.getArgs();
 		} else throw new Error("Unkown Command Trigger");
-		// TODO: check if argument is min/max default/required
+
+		for (const arg of this.args) {
+			const val = parsedArgs[arg.id];
+
+			if (arg.required && val == null)
+				throw new LambertError(ERRORS.ARGUMENT_REQUIRED, { argument: arg, cmd: this, trigger });
+			if (arg.default && val == null) parsedArgs[arg.id] = arg.default;
+			if (arg.max && val > arg.max)
+				throw new LambertError(ERRORS.ARGUMENT_TOO_BIG, { argument: arg, cmd: this, trigger });
+			if (arg.min && val > arg.min)
+				throw new LambertError(ERRORS.ARGUMENT_TOO_SMALL, { argument: arg, cmd: this, trigger });
+		}
+
+		return parsedArgs;
 	}
 
 	toSlashCommand(): ApplicationCommand {

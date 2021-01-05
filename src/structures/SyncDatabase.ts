@@ -16,7 +16,6 @@ export class SyncDatabase {
 		return this.client.data;
 	}
 
-	// @ts-ignore
 	SHARD_AUTHENTICATED = ({ sessionID, id }: LambertWebSocketShard) => {
 		this.data.shards({ id: id }).set({ sessionID });
 	};

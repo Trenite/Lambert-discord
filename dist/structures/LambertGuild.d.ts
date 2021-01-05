@@ -4,6 +4,7 @@ import { DatastoreInterface } from "lambert-db/dist/Datastore";
 declare module "discord.js" {
     interface Guild {
         _prefix: ProviderCache;
+        _locale: ProviderCache;
         prefix: string;
         data: DatastoreInterface;
         init(): Promise<any>;
@@ -17,6 +18,7 @@ export declare class LambertGuild {
     _patch(data: any): any;
     init(): Promise<void>;
     get prefix(): any;
+    get language(): void;
     get data(): DatastoreInterface;
     destroy(): Promise<void>;
 }

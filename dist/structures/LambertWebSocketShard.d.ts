@@ -1,7 +1,8 @@
-import { WebSocketShard } from "discord.js";
-import { LambertWebSocketManager } from "./LambertWebSocketManager";
-export declare class LambertWebSocketShard extends WebSocketShard {
-    constructor(manager: LambertWebSocketManager, id: number);
+import { WebSocketShard as WSShard } from "discord.js";
+export interface LambertWebSocketShard extends WSShard {
+}
+export declare class LambertWebSocketShard {
+    sessionID: string;
     destroy(opts: any): void;
     private onPacket;
 }

@@ -86,8 +86,6 @@ export class LambertDiscordClient extends Client {
 		super(options);
 		this.token = options.token;
 
-		// @ts-ignore
-		// this.ws = new LambertWebSocketManager(this);
 		this.server = new LambertServer(this, options.server);
 		this.eventLogger = new ClientEventLogger(this, options.eventLogger);
 		this.webhookLogger = new WebhookLogger(options.webhookLogger);
@@ -97,7 +95,7 @@ export class LambertDiscordClient extends Client {
 		else this.db = this.options.db;
 
 		this.dbSync = new SyncDatabase(this);
-		this.lang = i18next.createInstance({});
+		// this.lang = i18next.createInstance({});
 
 		process.on("SIGINT", this.shutdown);
 

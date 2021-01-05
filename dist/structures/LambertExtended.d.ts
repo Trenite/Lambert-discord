@@ -1,4 +1,6 @@
 import { LambertGuild } from "./LambertGuild";
 import { LambertGuildMember } from "./LambertGuildMember";
 import { LambertMessage } from "./LambertMessage";
-export { LambertGuild, LambertMessage, LambertGuildMember };
+import { LambertWebSocketManager } from "./LambertWebSocketManager";
+import { LambertWebSocketShard } from "./LambertWebSocketShard";
+export { LambertGuild, LambertMessage, LambertGuildMember, LambertWebSocketShard, LambertWebSocketManager };

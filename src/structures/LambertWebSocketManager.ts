@@ -1,39 +1,50 @@
 // @ts-nocheck
-import { WebSocketManager, WebSocketOptions, DJSError, Util, WebSocketShard, ClientUser, Collection } from "discord.js";
-import DJSError from "discord.js/src/errors/DJSError";
+import { WebSocketManager as WSManager, WebSocketOptions, Util, WebSocketShard, ClientUser } from "discord.js";
 import { Constants } from "./Constants";
-const { ShardEvents, Events, WSCodes } = Constants;
 import { LambertDiscordClient } from "./LambertDiscordClient";
 import { LambertWebSocketShard } from "./LambertWebSocketShard";
+const { ShardEvents, Events, WSCodes } = Constants;
+
+try {
+	var WebSocketManager = require("../../../discord.js/src/client/websocket/WebSocketManager");
+} catch (error) {
+	var WebSocketManager = require("../../node_modules/discord.js/src/client/websocket/WebSocketManager");
+}
+
+try {
+	var WebSocketShard = require("../../../discord.js/src/client/websocket/WebSocketShard");
+} catch (error) {
+	var WebSocketShard = require("../../node_modules/discord.js/src/client/websocket/WebSocketShard");
+}
 
 const UNRECOVERABLE_CLOSE_CODES = Object.keys(WSCodes).slice(1).map(Number);
 const UNRESUMABLE_CLOSE_CODES = [1000, 4006, 4007];
 
 declare module "discord.js" {
 	interface WebSocketManager {
+		// @ts-ignore
 		destroy(keepalive?: number): void;
 	}
 }
 
-export class LambertWebSocketManager extends WebSocketManager {
-	constructor(client: LambertDiscordClient) {
-		super(client);
+export interface LambertWebSocketManager extends WSManager {}
 
+export class LambertWebSocketManager {
+	private async connect(): Promise<void> {
 		if (this.client.options.ws?.sessionIDs) {
 			this.client.options.ws.autoresume = true;
 		}
-	}
 
-	private async connect(): Promise<void> {
-		const invalidToken = new DJSError(WSCodes[4004]);
-		const {
+		const invalidToken = new Error(WSCodes[4004]);
+		let {
 			url: gatewayURL,
 			shards: recommendedShards,
 			session_start_limit: sessionStartLimit,
-			// @ts-ignore
 		} = await this.client.api.gateway.bot.get().catch((error: any) => {
 			throw error.httpStatus === 401 ? invalidToken : error;
 		});
+
+		if (this.client.options.ws.gatewayURL) gatewayURL = this.client.options.ws.gatewayURL;
 
 		this.sessionStartLimit = sessionStartLimit;
 
@@ -60,7 +71,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 
 		this.totalShards = shards.length;
 		this.debug(`Spawning shards: ${shards?.join(", ")}`);
-		this.shardQueue = new Set(shards.map((id) => new LambertWebSocketShard(this, id)));
+		this.shardQueue = new Set(shards.map((id) => new WebSocketShard(this, id)));
 
 		await this._handleSessionLimit(remaining, reset_after);
 		if (this.client.options.ws?.autoresume) await this.restoreStructure();
@@ -170,11 +181,6 @@ export class LambertWebSocketManager extends WebSocketManager {
 		}
 	}
 
-	// protected handlePacket(packet: any, shard: LambertWebSocketShard): boolean {
-	// 	packet.shard = shard;
-	// 	return super.handlePacket(packet, shard);
-	// }
-
 	protected async createShards(): Promise<void> {
 		// If we don't have any shards to handle, return
 		if (!this.shardQueue.size) return;
@@ -194,7 +200,7 @@ export class LambertWebSocketManager extends WebSocketManager {
 		const handleError = (error: any) => {
 			if (error && error.code && UNRECOVERABLE_CLOSE_CODES.includes(error.code)) {
 				// @ts-ignore
-				throw new DJSError(WSCodes[error.code]);
+				throw new Error(WSCodes[error.code]);
 				// Undefined if session is invalid, error event for regular closes
 			} else if (!error || error.code) {
 				this.debug("Failed to connect to the gateway, requeueing...", shard);
@@ -245,7 +251,14 @@ export class LambertWebSocketManager extends WebSocketManager {
 	}
 }
 
+WebSocketManager.prototype.connect = LambertWebSocketManager.prototype.connect;
+WebSocketManager.prototype.createShards = LambertWebSocketManager.prototype.createShards;
+WebSocketManager.prototype.destroy = LambertWebSocketManager.prototype.destroy;
+WebSocketManager.prototype.manageShard = LambertWebSocketManager.prototype.manageShard;
+WebSocketManager.prototype.restoreStructure = LambertWebSocketManager.prototype.restoreStructure;
+
 export interface LambertWebSocketOptions extends WebSocketOptions {
 	sessionIDs?: string[];
 	autoresume?: boolean;
+	gatewayURL?: string;
 }

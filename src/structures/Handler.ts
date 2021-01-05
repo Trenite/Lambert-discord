@@ -14,7 +14,7 @@ export const HandlerEvents = {
 	ERROR: "error",
 };
 
-export type HandlerOptions = { id: string; json: boolean };
+export type HandlerOptions = { id: string; json?: boolean };
 
 export class Handler<Holds extends Module> extends Module {
 	public readonly client?: LambertDiscordClient;

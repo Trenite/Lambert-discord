@@ -3,10 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Constants = exports.Command = exports.Listener = exports.SyncDatabase = exports.LambertGuildMember = exports.LambertGuild = exports.LambertMessage = exports.LambertWebSocketManager = exports.LambertWebSocketShard = exports.LambertDiscordClient = void 0;
 const LambertDiscordClient_1 = require("./structures/LambertDiscordClient");
 Object.defineProperty(exports, "LambertDiscordClient", { enumerable: true, get: function () { return LambertDiscordClient_1.LambertDiscordClient; } });
-const LambertWebSocketManager_1 = require("./structures/LambertWebSocketManager");
-Object.defineProperty(exports, "LambertWebSocketManager", { enumerable: true, get: function () { return LambertWebSocketManager_1.LambertWebSocketManager; } });
-const LambertWebSocketShard_1 = require("./structures/LambertWebSocketShard");
-Object.defineProperty(exports, "LambertWebSocketShard", { enumerable: true, get: function () { return LambertWebSocketShard_1.LambertWebSocketShard; } });
 const SyncDatabase_1 = require("./structures/SyncDatabase");
 Object.defineProperty(exports, "SyncDatabase", { enumerable: true, get: function () { return SyncDatabase_1.SyncDatabase; } });
 const Command_1 = require("./structures/Command");
@@ -15,10 +11,10 @@ const Constants_1 = require("./structures/Constants");
 Object.defineProperty(exports, "Constants", { enumerable: true, get: function () { return Constants_1.Constants; } });
 const LambertExtended_1 = require("./structures/LambertExtended");
 Object.defineProperty(exports, "LambertGuildMember", { enumerable: true, get: function () { return LambertExtended_1.LambertGuildMember; } });
-const LambertGuild_1 = require("./structures/LambertGuild");
-Object.defineProperty(exports, "LambertGuild", { enumerable: true, get: function () { return LambertGuild_1.LambertGuild; } });
-const LambertMessage_1 = require("./structures/LambertMessage");
-Object.defineProperty(exports, "LambertMessage", { enumerable: true, get: function () { return LambertMessage_1.LambertMessage; } });
+Object.defineProperty(exports, "LambertGuild", { enumerable: true, get: function () { return LambertExtended_1.LambertGuild; } });
+Object.defineProperty(exports, "LambertMessage", { enumerable: true, get: function () { return LambertExtended_1.LambertMessage; } });
+Object.defineProperty(exports, "LambertWebSocketManager", { enumerable: true, get: function () { return LambertExtended_1.LambertWebSocketManager; } });
+Object.defineProperty(exports, "LambertWebSocketShard", { enumerable: true, get: function () { return LambertExtended_1.LambertWebSocketShard; } });
 const Listener_1 = require("./structures/Listener");
 Object.defineProperty(exports, "Listener", { enumerable: true, get: function () { return Listener_1.Listener; } });
 /**
@@ -31,4 +27,4 @@ Object.defineProperty(exports, "Listener", { enumerable: true, get: function () 
  * Guild has members
  *
  */
-//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsNEVBQXlFO0FBYXhFLHFHQWJRLDJDQUFvQixPQWFSO0FBWnJCLGtGQUErRTtBQWM5RSx3R0FkUSxpREFBdUIsT0FjUjtBQWJ4Qiw4RUFBMkU7QUFZMUUsc0dBWlEsNkNBQXFCLE9BWVI7QUFYdEIsNERBQXlEO0FBZ0J4RCw2RkFoQlEsMkJBQVksT0FnQlI7QUFmYixrREFBK0M7QUFrQjlDLHdGQWxCUSxpQkFBTyxPQWtCUjtBQWpCUixzREFBbUQ7QUFrQmxELDBGQWxCUSxxQkFBUyxPQWtCUjtBQWhCVixrRUFBa0U7QUFXakUsbUdBWFEsb0NBQWtCLE9BV1I7QUFWbkIsNERBQXlEO0FBU3hELDZGQVRRLDJCQUFZLE9BU1I7QUFSYixnRUFBNkQ7QUFPNUQsK0ZBUFEsK0JBQWMsT0FPUjtBQU5mLG9EQUFpRDtBQVVoRCx5RkFWUSxtQkFBUSxPQVVSO0FBTVQ7Ozs7Ozs7OztHQVNHIn0=
+//# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoiaW5kZXguanMiLCJzb3VyY2VSb290IjoiIiwic291cmNlcyI6WyIuLi9zcmMvaW5kZXgudHMiXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6Ijs7O0FBQUEsNEVBQXlFO0FBZXhFLHFHQWZRLDJDQUFvQixPQWVSO0FBZHJCLDREQUF5RDtBQW9CeEQsNkZBcEJRLDJCQUFZLE9Bb0JSO0FBbkJiLGtEQUErQztBQXNCOUMsd0ZBdEJRLGlCQUFPLE9Bc0JSO0FBckJSLHNEQUFtRDtBQXNCbEQsMEZBdEJRLHFCQUFTLE9Bc0JSO0FBcEJWLGtFQU1zQztBQVNyQyxtR0FkQSxvQ0FBa0IsT0FjQTtBQURsQiw2RkFaQSw4QkFBWSxPQVlBO0FBRFosK0ZBVkEsZ0NBQWMsT0FVQTtBQURkLHdHQVJBLHlDQUF1QixPQVFBO0FBRHZCLHNHQU5BLHVDQUFxQixPQU1BO0FBSnRCLG9EQUFpRDtBQVVoRCx5RkFWUSxtQkFBUSxPQVVSO0FBTVQ7Ozs7Ozs7OztHQVNHIn0=

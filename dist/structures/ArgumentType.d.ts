@@ -9,5 +9,5 @@ export declare type ParseOptions = {
 };
 export declare abstract class ArgumentType extends Module {
     slashType: ApplicationCommandOptionType;
-    abstract parse({ val, trigger, cmd }: ParseOptions): any;
+    abstract parse({ val, trigger, cmd }: ParseOptions): Promise<any> | any;
 }

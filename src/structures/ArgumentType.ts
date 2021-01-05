@@ -8,5 +8,5 @@ export type ParseOptions = { val: string; trigger: CommandTrigger; cmd: Command 
 
 export abstract class ArgumentType extends Module {
 	public slashType: ApplicationCommandOptionType;
-	abstract parse({ val, trigger, cmd }: ParseOptions): any;
+	abstract parse({ val, trigger, cmd }: ParseOptions): Promise<any> | any;
 }

@@ -16,5 +16,5 @@ export class LanguageHandler extends Handler<LanguageModule> {
 		await this.localization.init();
 	}
 
-	reload;
+	// reload;
 }

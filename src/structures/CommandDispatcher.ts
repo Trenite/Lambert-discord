@@ -63,26 +63,12 @@ export class CommandDispatcher {
 	}) {
 		if (!cmd || !(cmd instanceof Command)) return; // emit unkown cmd
 		try {
-			const throttleTime = cmd.throttle((<Message>trigger).author?.id || trigger.member?.id);
-			if (throttleTime) {
-				throw new LambertError(ERRORS.THROTTLED, { user: trigger, time: throttleTime });
-			}
+			await cmd.check(trigger);
 
-			const botMember = <LambertGuildMember | null>(
-				trigger.guild?.members.resolve((<ClientUser>this.client.user).id)
-			);
-			if (botMember) await botMember.hasAuths(cmd.clientPermissions, true);
-			if (trigger.member) await trigger.member.hasAuths(cmd.userPermissions, true);
-
-			if ((<TextChannel>trigger.channel).nsfw && !cmd.nsfw)
-				throw new LambertError(ERRORS.NOT_NSFW_CHANNEL, { command: cmd, trigger, channel: trigger.channel });
-
-			if (!trigger.guild && cmd.guildOnly) throw new LambertError(ERRORS.GUILD_ONLY, { command: cmd, trigger });
-
-			const parsedArgs = await cmd.getArgs({ cmd, trigger, args });
+			const parsedArgs = await cmd.getArgs({ trigger, args });
 
 			// get arguments
-			await cmd.exec(trigger, parsedArgs);
+			await cmd._exec(trigger, parsedArgs);
 		} catch (error) {
 			let content = "There was an error processing the command";
 			let options = {};
@@ -93,7 +79,7 @@ export class CommandDispatcher {
 				} else {
 				}
 			}
-			await trigger.ack({ showUsage: false, dm: true, replyIfError: true }, options).catch((e) => {});
+			await trigger.ack({ showUsage: false, dm: true, replyIfError: true }, content, options).catch((e) => {});
 		}
 	}
 

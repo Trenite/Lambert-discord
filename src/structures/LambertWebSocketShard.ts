@@ -1,22 +1,26 @@
 // @ts-nocheck
-
-import { WebSocketShard, WebSocketManager } from "discord.js";
+import { WebSocketShard as WSShard } from "discord.js";
 import { Constants } from "./Constants";
-import { LambertWebSocketManager } from "./LambertWebSocketManager";
 const { WSEvents, ShardEvents, OPCodes, WSCodes, Status } = Constants;
 
-export class LambertWebSocketShard extends WebSocketShard {
-	constructor(manager: LambertWebSocketManager, id: number) {
-		super(manager, id);
-	}
+try {
+	var WebSocketShard = require("../../../discord.js/src/client/websocket/WebSocketShard");
+} catch (error) {
+	var WebSocketShard = require("../../node_modules/discord.js/src/client/websocket/WebSocketShard");
+}
+
+export interface LambertWebSocketShard extends WSShard {}
+
+export class LambertWebSocketShard {
+	public sessionID: string;
 
 	public destroy(opts: any) {
 		if (opts && opts.keepalive) {
 			setTimeout(() => {
-				super.destroy(opts);
+				destroy.call(this, opts);
 			}, 1000 * 30);
 		} else {
-			super.destroy(opts);
+			destroy.call(this, opts);
 		}
 	}
 
@@ -43,3 +47,6 @@ export class LambertWebSocketShard extends WebSocketShard {
 		return super.onPacket(packet);
 	}
 }
+
+const destroy = WebSocketShard.prototype.destroy;
+WebSocketShard.prototype.destroy = LambertWebSocketShard.prototype.destroy;

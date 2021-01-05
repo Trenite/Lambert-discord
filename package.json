@@ -1,44 +1,52 @@
 {
-	"name": "lambert",
-	"version": "1.0.0",
-	"description": "",
-	"main": "dist/index.js",
-	"types": "dist/index.d.ts",
-	"scripts": {
-		"start": "node dist/",
-		"watch": "tsc -w .",
-		"dev": "nodemon test/",
-		"test": "echo \"Error: no test specified\" && exit 1"
-	},
-	"keywords": [],
-	"author": "",
-	"license": "ISC",
-	"dependencies": {
-		"body-parser": "^1.19.0",
-		"death": "^1.1.0",
-		"discord.js": "github:discordjs/discord.js",
-		"express": "^4.17.1",
-		"express-async-errors": "^3.1.1",
-		"flatted": "^3.1.0",
-		"i18next": "^19.8.4",
-		"missing-native-js-functions": "^1.0.7",
-		"mongodb": "^3.6.2",
-		"mongodb-memory-server": "^6.9.2",
-		"mongoose": "^5.11.8",
-		"node-fetch": "^2.6.1",
-		"signale": "^1.4.0",
-		"spotify-playback-sdk-node": "^1.0.2"
-	},
-	"devDependencies": {
-		"@types/express": "^4.17.8",
-		"@types/lodash": "^4.14.165",
-		"@types/mongodb": "^3.5.32",
-		"@types/mongoose": "^5.7.37",
-		"@types/node": "^14.14.6",
-		"@types/node-fetch": "^2.5.7",
-		"lambert-db": "file:../Lambert-db",
-		"nodemon": "^2.0.6",
-		"ts-mixer": "^5.3.0",
-		"typescript": "^4.0.5"
-	}
+  "name": "lambert",
+  "version": "1.0.0",
+  "description": "Discord.JS Bot Framework",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "start": "node dist/",
+    "watch": "tsc -w .",
+    "dev": "nodemon test/",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "death": "^1.1.0",
+    "discord.js": "github:discordjs/discord.js",
+    "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "flatted": "^3.1.0",
+    "i18next": "^19.8.4",
+    "missing-native-js-functions": "^1.0.7",
+    "mongodb": "^3.6.2",
+    "mongodb-memory-server": "^6.9.2",
+    "mongoose": "^5.11.8",
+    "node-fetch": "^2.6.1",
+    "signale": "^1.4.0",
+    "spotify-playback-sdk-node": "^1.0.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.8",
+    "@types/lodash": "^4.14.165",
+    "@types/mongodb": "^3.5.32",
+    "@types/mongoose": "^5.7.37",
+    "@types/node": "^14.14.6",
+    "@types/node-fetch": "^2.5.7",
+    "lambert-db": "file:../Lambert-db",
+    "nodemon": "^2.0.6",
+    "ts-mixer": "^5.3.0",
+    "typescript": "^4.0.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Trenite/Lambert-discord.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Trenite/Lambert-discord/issues"
+  },
+  "homepage": "https://github.com/Trenite/Lambert-discord#readme"
 }

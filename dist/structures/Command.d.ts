@@ -59,11 +59,12 @@ export declare abstract class Command extends Handler<Command> {
     clientPermissions: LambertPermissionResolvable;
     userPermissions: LambertPermissionResolvable;
     constructor(props: CommandOptions);
+    _exec(trigger: CommandTrigger, args: any): Promise<any> | any;
     exec(trigger: CommandTrigger, args: any): Promise<any> | any;
     throttle(userID: string): number;
     getModule(id: string): Command | undefined;
-    getArgs({ cmd, trigger, args, }: {
-        cmd: Command;
+    check(trigger: CommandTrigger): Promise<void>;
+    getArgs({ trigger, args }: {
         trigger: CommandTrigger;
         args: Record<string, Argument> | string;
     }): Promise<Record<string, any>>;

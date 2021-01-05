@@ -7,6 +7,7 @@ import { CommandHandler, CommandHandlerOptions } from "./CommandHandler";
 import { Handler } from "./Handler";
 import { Inhibitor } from "./Inhibitor";
 import { MessageTransformer } from "./MessageTransformers";
+import { LanguageHandler, LanguageHandlerOptions } from "./LanguageHandler";
 export declare type MessageEmbedTypes = "error" | "warn" | "success" | "wait" | "noembed";
 declare module "discord.js" {
     interface MessageOptions {
@@ -16,16 +17,18 @@ declare module "discord.js" {
 export declare type RegistryOptions = {
     client: LambertDiscordClient;
     commands?: CommandHandlerOptions;
+    language?: LanguageHandlerOptions;
 };
 export declare class Registry {
     client: LambertDiscordClient;
     dispatcher: CommandDispatcher;
     commands: CommandHandler;
+    languages: LanguageHandler;
     inhibitors: Handler<Inhibitor>;
     events: Handler<Command>;
     types: Handler<ArgumentType>;
     messageTransformers: MessageTransformer[];
-    constructor({ client, commands }: RegistryOptions);
+    constructor({ client, commands, language }: RegistryOptions);
     init(): Promise<[void, void, void, void, void]>;
     destroy(): Promise<[void, void, void, void, void]>;
     registerDefault(): Promise<[void, void, void]>;

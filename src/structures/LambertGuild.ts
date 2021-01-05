@@ -33,9 +33,9 @@ export class LambertGuild {
 		return this._prefix.get() || this.client.options.commandPrefix;
 	}
 
-	get locale() {
-		return this._locale.get() || this.client.options.defaultLocale;
-	}
+	// get locale() {
+	// 	return this._locale.get() || this.client.options.defaultLocale;
+	// }
 
 	get language() {
 		return;

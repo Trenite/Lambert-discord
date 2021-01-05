@@ -13,11 +13,13 @@ export declare const HandlerEvents: {
 };
 export declare type HandlerOptions = {
     id: string;
+    json?: boolean;
 };
 export declare class Handler<Holds extends Module> extends Module {
     readonly client?: LambertDiscordClient;
     readonly modules: Collection<string, Holds>;
-    constructor({ id }: HandlerOptions);
+    private loadJson;
+    constructor({ id, json }: HandlerOptions);
     loadAll(dir: string): Promise<void>;
     load(path: string): Holds;
     register(mod: Holds): Promise<Holds>;

@@ -25,7 +25,7 @@
     "mongodb": "^3.6.2",
     "mongodb-memory-server": "^6.9.2",
     "mongoose": "^5.11.8",
-    "node-fetch": "^2.6.1",
+    "node-fetch": "^2.6.7",
     "signale": "^1.4.0",
     "spotify-playback-sdk-node": "^1.0.2"
   },
